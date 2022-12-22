@@ -301,6 +301,76 @@ void movement_play_alarm(void) {
     movement_play_alarm_beeps(5, BUZZER_NOTE_C8);
 }
 
+/*
+ * Announce the time to the nearest quarter hour using beeps.
+ * The way this works is as follows:
+ * - First, beep the hours. Low tones are 5's, higher tones are 1's.
+ *   - Similar to roman numerals, if the current hour is 4 or 9, we
+ *     beep the 1 first, then either one or two 5's for 4 or 9 respectively.
+ * - Slight pause, then beep the minutes. Each beep represents 15 minutes.
+ */
+void movement_announce_time(watch_date_time date_time) {
+    uint8_t hour, minute, num_fives, num_ones;
+    BuzzerNote note_1 = BUZZER_NOTE_C4;
+    BuzzerNote note_2 = BUZZER_NOTE_C5;
+    uint8_t num_chimes_1, num_chimes_2;
+
+    hour = date_time.unit.hour;
+    minute = date_time.unit.minute;
+
+    if (minute >= 52) {
+        hour += 1;
+        minute = 0;
+    }
+
+    if (hour > 12) hour -= 12;
+
+    // the midnight hour
+    if (hour == 0) hour = 12;
+
+    num_fives = hour / 5;
+    num_ones = hour % 5;
+
+    num_chimes_1 = num_fives;
+    num_chimes_2 = num_ones;
+
+    // roman numeral that shiz
+    if (num_ones == 4) {
+        note_1 = BUZZER_NOTE_C5;
+        note_2 = BUZZER_NOTE_C4;
+        num_chimes_1 = 1;
+        num_chimes_2 = num_fives + 1;
+    }
+
+    for (uint8_t i = 0; i < num_chimes_1; i++) {
+        watch_buzzer_play_note(note_1, 75);
+        watch_buzzer_play_note(BUZZER_NOTE_REST, 100);
+    }
+
+    for (uint8_t i = 0; i < num_chimes_2; i++) {
+        watch_buzzer_play_note(note_2, 75);
+        watch_buzzer_play_note(BUZZER_NOTE_REST, 100);
+    }
+
+    // pause
+    watch_buzzer_play_note(BUZZER_NOTE_REST, 100);
+
+    // minutes
+    num_chimes_1 = 0;
+    if (minute > 7 && minute <= 22) {
+        num_chimes_1 = 1;
+    } else if (minute > 22 && minute <= 37) {
+        num_chimes_1 = 2;
+    } else if (minute > 37 && minute < 52) {
+        num_chimes_1 = 3;
+    }
+
+    for (uint8_t i = 0; i < num_chimes_1; i++) {
+        watch_buzzer_play_note(BUZZER_NOTE_C7, 75);
+        watch_buzzer_play_note(BUZZER_NOTE_REST, 100);
+    }
+}
+
 void movement_play_alarm_beeps(uint8_t rounds, BuzzerNote alarm_note) {
     if (rounds == 0) rounds = 1;
     if (rounds > 20) rounds = 20;

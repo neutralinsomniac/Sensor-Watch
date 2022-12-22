@@ -308,6 +308,7 @@ void movement_request_wake(void);
 
 void movement_play_signal(void);
 void movement_play_alarm(void);
+void movement_announce_time(watch_date_time);
 void movement_play_alarm_beeps(uint8_t rounds, BuzzerNote alarm_note);
 
 uint8_t movement_claim_backup_register(void);

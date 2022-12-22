@@ -133,6 +133,10 @@ bool simple_clock_face_loop(movement_event_t event, movement_settings_t *setting
             if (state->signal_enabled) watch_set_indicator(WATCH_INDICATOR_BELL);
             else watch_clear_indicator(WATCH_INDICATOR_BELL);
             break;
+        case EVENT_ALARM_BUTTON_UP:
+            date_time = watch_rtc_get_date_time();
+            movement_announce_time(date_time);
+            break;
         case EVENT_BACKGROUND_TASK:
             // uncomment this line to snap back to the clock face when the hour signal sounds:
             // movement_move_to_face(state->watch_face_index);
@@ -142,8 +146,8 @@ bool simple_clock_face_loop(movement_event_t event, movement_settings_t *setting
             } else {
                 // if we were in the background, we need to enable the buzzer peripheral first,
                 watch_enable_buzzer();
-                // beep quickly (this call blocks for 275 ms),
-                movement_play_signal();
+                date_time = watch_rtc_get_date_time();
+                movement_announce_time(date_time);
                 // and then turn the buzzer peripheral off again.
                 watch_disable_buzzer();
             }
