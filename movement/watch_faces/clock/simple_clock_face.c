@@ -142,7 +142,8 @@ bool simple_clock_face_loop(movement_event_t event, movement_settings_t *setting
             // movement_move_to_face(state->watch_face_index);
             if (watch_is_buzzer_or_led_enabled()) {
                 // if we are in the foreground, we can just beep.
-                movement_play_signal();
+                date_time = watch_rtc_get_date_time();
+                movement_announce_time(date_time);
             } else {
                 // if we were in the background, we need to enable the buzzer peripheral first,
                 watch_enable_buzzer();
